@@ -1,0 +1,3 @@
+- Tạo database với mỗi 1 account => database sẽ có trường ID tăng dần
+- gen code với ID này
+- Database sẽ có format: ID, ACCESSTOKEN, DATE, QUOTA , STAUS (disable/enable)

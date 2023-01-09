@@ -1,0 +1,8 @@
+npm install xlsx
+
+<!-- Request -->
+http://localhost:9000/gendatabase?accessToken=09f76ee031ad59a5ff9f43f06427b799
+
+<!-- REFERENCE -->
+https://www.geeksforgeeks.org/how-to-read-and-write-excel-file-in-node-js/
+https://www.w3schools.com/sql/sql_insert.asp
