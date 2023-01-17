@@ -38,7 +38,7 @@ https://leafletjs.com/reference.html#map-setview
 https://viblo.asia/p/su-khac-nhau-giua-deep-copy-va-shallow-copy-trong-javascript-4dbZN3qylYM
 
 <!-- API -->
-localhost:9000/notify_trash?id=1&status=FULL
+localhost:9000/notify_trash?ip=1.1.1.1&status=FULL
 
 <!-- TO DO : p <=> process, d <=> done x <=> not handel-->
 - [d] Fix không cho focus vào khung map => ấn tab để tái hiện.

@@ -94,7 +94,7 @@ module.exports.GetSingleMaker = function(data, call_back) {
         call_back({'status': false, 'reason':'server side error'});
     } else {
         db_trash.serialize(function() {
-            let sql =  `SELECT ID FROM TRASH WHERE ID=${data.ID}`;
+            let sql =  `SELECT IP FROM TRASH WHERE IP='${data.IP}'`;
             db_trash.all(sql, [], function (err, rows) {
                 if (err) {
                     console.log(TAG, err);
@@ -103,7 +103,7 @@ module.exports.GetSingleMaker = function(data, call_back) {
                     if (rows.length) {
                         call_back({'status': true, 'data': rows});
                     } else {
-                        call_back({'status': false, 'reason': `notfound marker ID=${data.ID}`});
+                        call_back({'status': false, 'reason': `notfound marker IP='${data.IP}'`});
                     }
                 }
             });
@@ -115,13 +115,13 @@ module.exports.AddMarker = function(data, call_back) {
         call_back(412, {'status':'lat lng invalid'});
         return;
     }
-    if (!data.ID) data.ID = 'NULL';
+    if (!data.IP) data.IP = 'NULL';
     if (!data.NAME) data.NAME= '~%fake_NULL%~';
     if (!isReady) {
         call_back(500, {'status':'error'});
     } else {
         db_trash.serialize(function() {
-            let sql =  `INSERT INTO TRASH VALUES (${data.ID}, ${data.LAT}, ${data.LNG}, '${data.NAME}');`;
+            let sql =  `INSERT INTO TRASH VALUES ('${data.IP}', ${data.LAT}, ${data.LNG}, '${data.NAME}');`;
             db_trash.all(sql, [], function (err, rows) {
                 if (err) {
                     console.log(TAG, err);
@@ -138,13 +138,13 @@ module.exports.EditMarker = function(data, call_back) {
         call_back(412, {'status':'lat lng invalid'});
         return;
     }
-    if (!data.ID) data.ID = 'NULL';
+    if (!data.IP) data.IP = 'NULL';
     if (!data.NAME) data.NAME= '~%fake_NULL%~';
     if (!isReady) {
         call_back(500, {'status':'error'});
     } else {
         db_trash.serialize(function() {
-            let sql =  `UPDATE TRASH SET ID=${data.ID}, LAT=${data.LAT}, LNG=${data.LNG}, NAME='${data.NAME}' WHERE ID=${data._ID};`;
+            let sql =  `UPDATE TRASH SET IP='${data.IP}', LAT=${data.LAT}, LNG=${data.LNG}, NAME='${data.NAME}' WHERE IP='${data._IP}';`;
             db_trash.all(sql, [], function (err, rows) {
                 if (err) {
                     console.log(TAG, err);
@@ -156,13 +156,13 @@ module.exports.EditMarker = function(data, call_back) {
         });
     }
 }
-module.exports.DeleteMarker = function(id, call_back) {
-    console.log(id);
+module.exports.DeleteMarker = function(ip, call_back) {
+    console.log(ip);
     if (!isReady) {
         call_back(500, {'status':'error'});
     } else {
         db_trash.serialize(function() {
-            let sql =  `DELETE FROM TRASH WHERE ID=${id};`;
+            let sql =  `DELETE FROM TRASH WHERE IP='${ip}';`;
             db_trash.all(sql, [], function (err, rows) {
                 if (err) {
                     console.log(TAG, err);

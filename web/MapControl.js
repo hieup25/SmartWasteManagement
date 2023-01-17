@@ -180,7 +180,7 @@ var contentInfo =
     `<div style="" class="d-flex flex-column">
         <strong style="color:blue;">INFO TRASH</strong><br>
         <span class="mb-2" id="nameinfo"></span>
-        <span id="idinfo"></span><hr>
+        <span id="ipinfo"></span><hr>
         <div>
         <button class="btn btn-outline-primary btn-sm" onclick="MarkerEdit()">Edit</button>
         <button class="btn btn-outline-danger btn-sm" onclick="MarkerRemove()">Remove</button>
@@ -197,8 +197,8 @@ var contentAddEditTrash =
         <input type="text" class="form-control" id="fname" name="trashsdn" placeholder="Name trash, can not fill" autocomple="off" maxlength="30">
     </div>
     <div class="input-group mb-2 input-group-sm">
-        <span class="input-group-text">ID</span>
-        <input type="number" class="form-control" id="fid" placeholder="Unique identifier" min="0" step="1">
+        <span class="input-group-text">IP</span>
+        <input type="text" class="form-control" id="fip" placeholder="Unique address">
     </div>
     <strong class="h6"><small>LatLng: <u><i>If place not found, move pin on map to locate the trash</i></u></small></strong><hr>
     <div>
@@ -211,7 +211,7 @@ var infowindow, addtrashwindow;
 var markerSelectCurrent, markerAddNew, markerEdit, markerOld, indexOld;
 var g_accessToken = "", g_url_place_config = "";
 var modeMarker = 0; // 0<=>add, 1<=>edit, 2<=>add_start_end, 3 <=>mode_other
-var markerArray = []; // {'marker':value, 'name':value, 'id':value, 'status':{value}(0=undefine,1=full,2=empty)}
+var markerArray = []; // {'marker':value, 'name':value, 'ip':value, 'status':{value}(0=undefine,1=full,2=empty)}
 var myModal;
 var marker_start=null, marker_end=null, marker_start_t=null, marker_end_t=null;
 let t_routing = null;
@@ -297,7 +297,7 @@ async function getMakerData() {
                     marker.bindTooltip(ct, {permanent:true,direction:"top",offset:[1, -65],opacity:0.95}).openTooltip();
                 }
                 setEventMarker(marker);
-                markerArray.push({'marker':marker, 'name':val.NAME, 'id':val.ID, 'status':0}); // Not asyn, cause init
+                markerArray.push({'marker':marker, 'name':val.NAME, 'ip':val.IP, 'status':0}); // Not asyn, cause init
                 updateTrashStatus(markerArray);
             }
         });
@@ -316,7 +316,7 @@ function updateStatusTrash() {
                 throw 0;
             } else {
                 data.forEach(el => {
-                    let find = markerArray.find(_el => (_el.id == el.id));
+                    let find = markerArray.find(_el => (_el.ip == el.ip));
                     if (find) {
                         let _path_trash;
                         let _trash = markerArray[markerArray.indexOf(find)];
@@ -331,7 +331,7 @@ function updateStatusTrash() {
                             btn_route();
                         }
                         if (_trash.status==1) {
-                            showNoti(`Trash '${_trash.name}(${_trash.id})' is full`);
+                            showNoti(`Trash '${_trash.name}(${_trash.ip})' is full`);
                         }
                     }
                     updateTrashStatus(markerArray);
@@ -402,7 +402,7 @@ function initialize() {
 }
 function setEventPopup() {
     let fplace = null;
-    let v_place, v_name, v_id;
+    let v_place, v_name, v_ip;
     addtrashwindow.on('add', ()=> {
         console.log('addtrashwindow added');
         if (modeMarker==1) {
@@ -412,11 +412,11 @@ function setEventPopup() {
         if (markerAddNew) {
             $('#fplace').val(v_place);
             $('#fname').val(v_name);
-            $('#fid').val(v_id);
+            $('#fip').val(v_ip);
         }
         if (modeMarker==1 && markerOld) {
             $('#fname').val(markerOld.name);
-            $('#fid').val(markerOld.id);
+            $('#fip').val(markerOld.ip);
         }
         fplace.addListener("place_changed", ()=> {
             var place = fplace.getPlace();
@@ -435,7 +435,7 @@ function setEventPopup() {
         if (markerAddNew) {
             v_place = $('#fplace').val();
             v_name = $('#fname').val();
-            v_id = $('#fid').val();
+            v_ip = $('#fip').val();
         }
         fplace = null;
     });
@@ -444,8 +444,8 @@ function setEventPopup() {
         if (markerSelectCurrent) {
             var index_temp = markerArray.findIndex(x => x.marker == markerSelectCurrent);
             if (index_temp!=-1) {
-                $('#nameinfo').text('Name: '+markerArray[index_temp].name);
-                $('#idinfo').text('ID: '+markerArray[index_temp].id);
+                $('#nameinfo').text('Name: '+ markerArray[index_temp].name);
+                $('#ipinfo').text('IP: '+ markerArray[index_temp].ip);
             }
         }
     });
@@ -507,9 +507,9 @@ function MarkerRemove() {
         //confirm
         var index_temp = markerArray.findIndex(x => x.marker == t_marker);
         if (index_temp!=-1) {
-            let _id = markerArray[index_temp].id;
+            let _ip = markerArray[index_temp].ip;
             let _status = markerArray[index_temp].status;
-            fetch(`${g_url_server}delete_marker_to_database?id=${_id}`, {
+            fetch(`${g_url_server}delete_marker_to_database?ip=${_ip}`, {
                 method: 'DELETE'
             }).then(res => {
                 if (res.status!=200) {
@@ -534,20 +534,25 @@ function MarkerRemove() {
     }
 }
 function saveNewMarkerTrash() {
-    let _id = $('#fid').val();
+    let _ip = $('#fip').val();
     let _name = $('#fname').val();
     if (markerAddNew) {
         let t_marker = markerAddNew;
-        // check has id
-        if (!_id || _id < 0) {
-            showAlert("Field 'ID' cannot empty and is a positive integer");
+        // check has iP
+        if (!_ip) {
+            showAlert("Field 'IP' cannot empty");
             return;
         }
-        // check ID duplicate
-        var index_temp = markerArray.findIndex(x => x.id == _id);
+        let regex_ip = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        if (!regex_ip.test(_ip)) {
+            showAlert("Field 'IP' format invalid");
+            return;
+        }
+        // check IP duplicate
+        var index_temp = markerArray.findIndex(x => x.ip == _ip);
         console.log(index_temp);
         if (index_temp!=-1) {
-            showAlert("Field 'ID' duplicate");
+            showAlert("Field 'IP' duplicate");
             return;
         }
         markerAddNew=null;
@@ -563,14 +568,14 @@ function saveNewMarkerTrash() {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({'ID':_id, 'LAT':_lat, 'LNG':_lng, 'NAME':_name})
+            body: JSON.stringify({'IP':_ip, 'LAT':_lat, 'LNG':_lng, 'NAME':_name})
         }).then(res => {
             if (res.status!=200) {
                 showNoti('Add Trash Fail');
                 t_marker.remove();
             } else {
                 showNoti('Add Trash Success');
-                markerArray.push({'marker':t_marker, 'name':_name, 'id':_id, status:0});
+                markerArray.push({'marker':t_marker, 'name':_name, 'ip':_ip, status:0});
                 t_marker.unbindPopup();
                 t_marker.bindPopup(infowindow);
                 if (_name) {
@@ -592,19 +597,24 @@ function saveNewMarkerTrash() {
     }
     if (markerEdit) {
         if ((markerOld.marker.getLatLng() == markerEdit.getLatLng())&&
-            (markerOld.id == _id) && (markerOld.name) == _name) {
+            (markerOld.ip == _ip) && (markerOld.name) == _name) {
                 cancelMarkerTrash();
                 showNoti('Trash no chance');
                 return;
         }
         let t_marker = markerEdit;
-        // check has id
-        if (!_id || _id < 0) {
-            showAlert("Field 'ID' cannot empty and is a positive integer");
+        // check has ip
+        if (!_ip) {
+            showAlert("Field 'IP' cannot empty");
             return;
         }
-        // check ID duplicate
-        var index_temp = markerArray.findIndex(x => x.id == _id);
+        let regex_ip = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        if (!regex_ip.test(_ip)) {
+            showAlert("Field 'IP' format invalid");
+            return;
+        }
+        // check IP duplicate
+        var index_temp = markerArray.findIndex(x => x.ip == _ip);
         if (index_temp!=-1 && index_temp!=indexOld) {
             showAlert("Field 'ID' duplicate");
             return;
@@ -623,7 +633,7 @@ function saveNewMarkerTrash() {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({'_ID':markerOld.id, 'ID':_id, 'LAT':_lat, 'LNG':_lng, 'NAME':_name})
+            body: JSON.stringify({'_IP':markerOld.ip, 'IP':_ip, 'LAT':_lat, 'LNG':_lng, 'NAME':_name})
         }).then(res => {
             if (res.status!=200) {
                 showNoti('Edit Trash Fail');
@@ -631,7 +641,7 @@ function saveNewMarkerTrash() {
                 cancelMarkerTrash();
             } else {
                 showNoti('Edit Trash Success');
-                markerArray[indexOld] = {'marker':t_marker, 'name':_name, 'id':_id, status:markerArray[indexOld].status};
+                markerArray[indexOld] = {'marker':t_marker, 'name':_name, 'ip':_ip, status:markerArray[indexOld].status};
                 t_marker.bindPopup(infowindow);
                 if (_name) {
                     let ct= `<span style="color:crimson; font-size:15px;">${_name}</span>`

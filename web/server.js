@@ -41,23 +41,23 @@ app.get('/get_marker_from_database', (req, res)=>{
 });
 // status => FULL or EMPTY
 app.get('/notify_trash', (req, res)=> {
-   let id = req.query.id;
+   let ip = req.query.ip;
    let status = req.query.status;
    if (status !== 'FULL' && status !== 'EMPTY') {
       res.json({"status": "fail", "reason": "status trash invalid"});
       return;
    }
    // check id has database ???
-   database.GetSingleMaker({'ID':id}, function(check_id) {
+   database.GetSingleMaker({'IP':ip}, function(check_id) {
       if (!check_id['status']){
          res.json(check_id);
          return;
       }
       // check status FULL or EMPTY
-      let isExist = temp_status_trash.find(e => (e.id == id));
+      let isExist = temp_status_trash.find(e => (e.ip == ip));
       if (isExist==undefined) {
          let obj = {};
-         obj['id'] = id;
+         obj['ip'] = ip;
          obj['status'] = status;
          temp_status_trash.push(obj);
       } else {
@@ -82,10 +82,10 @@ app.put('/edit_marker_from_database', (req, res) => {
    });
 });
 app.delete('/delete_marker_to_database', (req, res)=>{
-   let id = req.query.id;
-   if (id) {
-      console.log(id);
-      database.DeleteMarker(id, function(status, result) {
+   let ip = req.query.ip;
+   if (ip) {
+      console.log(ip);
+      database.DeleteMarker(ip, function(status, result) {
          res.status(status).json(result);
       });
    } else {
