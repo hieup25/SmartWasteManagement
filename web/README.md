@@ -1,11 +1,6 @@
 <!-- AccessToken Only Use admin for request PlaceAPIServer-->
 09f76ee031ad59a5ff9f43f06427b799
 
-<!-- INSTALL MODULE -->
-npm install express
-npm install sqlite3
-npm install cors
-
 <!-- INCLUDE CDN -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -40,6 +35,16 @@ https://viblo.asia/p/su-khac-nhau-giua-deep-copy-va-shallow-copy-trong-javascrip
 <!-- API -->
 localhost:9000/notify_trash?ip=1.1.1.1&status=FULL
 
+<!-- IDEA -->
+- Nếu phát triển thêm thì
++, Thêm 1 server cloud để lưu trữ và trao đổi thông tin.
++, Server sẽ có nhiệm vụ lưu trữ thông tin của thùng rác(1) và những box server nào đã thêm thùng rác này vào(2):
+    Ví dụ có 2 box server cùng thêm => Khi trạng thái thay đổi thì cả 2 server này đều phải được request đến để thông báo cho box server
++, Về phía thùng rác thì cần request đến cloud này để GET được 1 mảng (2) sau khi thay đổi trạng thái request đến tất cả địa chỉ có trong mảng này.
++, Về phía box server thì cũng cần request đến cloud này để nhận trạng thái (1). Hoặc cũng có thể phát triển thêm GET những thùng rác nào đã được thêm....
+=> Phát triển cloud sẽ giúp bảo mật code phía cloud, không cần phải NAT quá nhiều client hoặc box server.
+=> Các box server và client cần đăng ký MAC vào trong cloud nhằm tính chính xác và bảo mật hệ thống.
+
 <!-- TO DO : p <=> process, d <=> done x <=> not handel-->
 - [d] Fix không cho focus vào khung map => ấn tab để tái hiện.
 - [p] Xử lý vấn đề data race trên mảng arraymarker và gửi dữ liệu xuống database
@@ -55,3 +60,5 @@ localhost:9000/notify_trash?ip=1.1.1.1&status=FULL
 - [d] Thông báo thùng rác nào đầy
 - [d] Xử lý update api placeconfig
 - [d] Xử lý cấu hình api placeconfig với webui
+- [p] Sau khi thêm thùng rác mới thì cần request đến địa chỉ này để lấy trạng thái thùng rác (sẽ request đến server 9000 và để server này request đến thùng rác rồi response về webui => webui sẽ dựa vào response để điều chỉnh icon và trạng thái)
+- [p] Sau khi edit nếu thay đổi địa chỉ ip thì cập nhật lại icon là undefine và request lại đến địa chỉ client đó để lấy trạng thái

@@ -196,9 +196,11 @@ var contentAddEditTrash =
         <span class="input-group-text">Name</span>
         <input type="text" class="form-control" id="fname" name="trashsdn" placeholder="Name trash, can not fill" autocomple="off" maxlength="30">
     </div>
-    <div class="input-group mb-2 input-group-sm">
+    <div class="input-group mb-2 input-group-sm was-validated" novalidate>
         <span class="input-group-text">IP</span>
-        <input type="text" class="form-control" id="fip" placeholder="Unique address">
+        <input type="text" class="form-control" id="fip" placeholder="Unique address" required pattern="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$">
+        <div class="valid-feedback" style="font-size:14px">IP Valid.</div>
+        <div class="invalid-feedback" style="font-size:14px">Please provide a valid IP.</div>
     </div>
     <strong class="h6"><small>LatLng: <u><i>If place not found, move pin on map to locate the trash</i></u></small></strong><hr>
     <div>
@@ -538,14 +540,10 @@ function saveNewMarkerTrash() {
     let _name = $('#fname').val();
     if (markerAddNew) {
         let t_marker = markerAddNew;
-        // check has iP
-        if (!_ip) {
-            showAlert("Field 'IP' cannot empty");
-            return;
-        }
-        let regex_ip = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-        if (!regex_ip.test(_ip)) {
-            showAlert("Field 'IP' format invalid");
+        // check valid IP
+        if (!document.getElementById('fip').checkValidity())
+        {
+            showAlert("Please provide a valid IP")
             return;
         }
         // check IP duplicate
@@ -603,14 +601,10 @@ function saveNewMarkerTrash() {
                 return;
         }
         let t_marker = markerEdit;
-        // check has ip
-        if (!_ip) {
-            showAlert("Field 'IP' cannot empty");
-            return;
-        }
-        let regex_ip = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-        if (!regex_ip.test(_ip)) {
-            showAlert("Field 'IP' format invalid");
+        // check valid IP
+        if (!document.getElementById('fip').checkValidity())
+        {
+            showAlert("Please provide a valid IP")
             return;
         }
         // check IP duplicate
