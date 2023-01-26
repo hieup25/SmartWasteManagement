@@ -1,6 +1,6 @@
 function ApplySettingUrlPlaceServer() {
     let url = $('#f_setting_url_place_server').val();
-    fetch(`${g_url_server}/place_config`, {
+    fetch(`${g_url_server}place_config`, {
         method: 'PUT',
         headers: {
             'Accept': 'application/json, text/plain, */*',
@@ -19,7 +19,7 @@ function ApplySettingUrlPlaceServer() {
 
 function ApplySettingAccessTokenPlaceServer() {
     let accesstoken = $('#f_setting_accesstoken_place_server').val();
-    fetch(`${g_url_server}/place_config`, {
+    fetch(`${g_url_server}place_config`, {
         method: 'PUT',
         headers: {
             'Accept': 'application/json, text/plain, */*',

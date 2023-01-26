@@ -131,7 +131,6 @@ var AutoComplete = (function() {
     }
     function set_listener_event_fill(element, list) {
         let searchTimeout = null;
-        let height_element = element.outerHeight();
         element.on('paste input', function() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(function() {
@@ -141,8 +140,9 @@ var AutoComplete = (function() {
                     $.getJSON(url, function(result) {
                         console.log(result.length);
                         $.each(result, function(index, item) {
-                            let li = $(`<li class="list-group-item form-control-sm"></li>`).html(`<b>${item.NAME} </b><small>${item.ADDRESS}</small>`);
-                            li.css({"height":height_element, "overflow":"hidden", "white-space": "nowrap", "padding":"5px 7px", "border-radius":'2px'});
+                            let li = $(`<li class="list-group-item form-control-sm"></li>`).html(`<b>${item.NAME} </b><br><small>${item.ADDRESS}</small>`);
+                            // "overflow":"scroll", "white-space": "nowrap",
+                            li.css({"height":"auto", "padding":"5px 7px", "border-radius":'2px'});
                             li.attr('place_find__index', index);
                             li.attr('title', item.NAME);
                             arrayItemData.push(item);
@@ -362,7 +362,7 @@ async function getPlaceConfig() {
     }
 }
 function initialize() {
-    var bounds = L.latLngBounds([7.730748, 102.0409], [23.47731, 111.6685]); //BOUNDS VIET NAM
+    var bounds = L.latLngBounds([7.730748, 102.0409], [23.47731, 111.6685]);
     map = L.map('map-canvas', {
         maxBounds: bounds,
         maxBoundsViscosity: 0.9,
@@ -857,6 +857,9 @@ function btn_start_end() {
     $('#txt-btn1').text('Save');
     $('#icon-btn2').css("background-image", "url('/image/cancel.png')");
     $('#txt-btn2').text('Remove');
+}
+function getStateTrashFromIP(trash) {
+    
 }
 $(document).ready(function() {
     g_url_server = window.location.href;

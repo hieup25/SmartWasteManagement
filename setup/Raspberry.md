@@ -19,7 +19,29 @@ npm install cors
 - Tạo file wpa_supplicant.conf trong /Volumes/boot/ với nội dung
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 network={
-ssid="YOUR_NETWORK_NAME"
-psk="YOUR_PASSWORD"
+ssid="Mi 11"
+psk="12345678"
 key_mgmt=WPA-PSK
 }
+
+<!-- Taọ deamon nodejs -->
+https://stackoverflow.com/questions/4018154/how-do-i-run-a-node-js-app-as-a-background-service
+
+[Unit]
+Description=swm
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/nodejs /home/pi/app/swm/server.js                 
+Restart=always
+User=pi    
+WorkingDirectory=/home/pi/app/swm/
+
+[Install]
+WantedBy=multi-user.target
+
+<!-- Cài đặt dịch vụ -->
+sudo chmod +x name_service.service
+sudo mv name_service.service /etc/systemd/system
+- Thực hiện các thao tác chạy dịch vụ như bình thường.
+journalctl -u swm.service // đọc log
