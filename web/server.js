@@ -1,5 +1,6 @@
 const database = require('./database/SQLManage.js');
 const express = require('express');
+const http = require('http');
 var cors = require('cors');
 const app = express();
 app.use(cors());
@@ -103,6 +104,31 @@ app.put('/place_config', (req, res)=> {
    database.SetPlaceConfig(req.body, function(status, result) {
       res.status(status).json(result);
    });
+});
+
+app.get('/getstatefromip', (req, res)=> {
+   let ip = req.query.ip;
+   const options = {
+      hostname: ip,
+      path: '/get-state',
+      method: 'GET'
+   };
+   const _req = http.request(options, (_res) => {
+      let data = ''
+      if (_res.statusCode == 200) {
+         _res.on('data', (chunk) => {
+             data += chunk;
+         });
+         // Ending the response 
+         _res.on('end', () => {
+            res.json(JSON.parse(data));
+         });
+      } else {
+         res.status(500).json({message: "error when request trash"});  
+      }
+   }).on("error", (err) => {
+         res.status(500).json({error:true, message:err});
+   }).end();
 });
 
 var server = app.listen(9000, function () {

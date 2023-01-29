@@ -298,10 +298,11 @@ async function getMakerData() {
                     let ct= `<span style="color:crimson; font-size:15px;">${val.NAME}</span>`
                     marker.bindTooltip(ct, {permanent:true,direction:"top",offset:[1, -65],opacity:0.95}).openTooltip();
                 }
-                setEventMarker(marker);
                 markerArray.push({'marker':marker, 'name':val.NAME, 'ip':val.IP, 'status':0}); // Not asyn, cause init
-                updateTrashStatus(markerArray);
             }
+        });
+        markerArray.forEach(el => {
+            getStateTrashFromIP(el.ip);
         });
     } catch (e) {
         console.log("Error when GET update_marker_data_form_database");
@@ -336,7 +337,6 @@ function updateStatusTrash() {
                             showNoti(`Trash '${_trash.name}(${_trash.ip})' is full`);
                         }
                     }
-                    updateTrashStatus(markerArray);
                 });
             }
         } catch (e) {
@@ -521,7 +521,6 @@ function MarkerRemove() {
                     showNoti('Delete Trash Success');
                     markerArray.splice(index_temp, 1);
                     t_marker.remove();
-                    updateTrashStatus(markerArray);
                 }
                 t_marker = null;
                 if (routing) {
@@ -574,16 +573,7 @@ function saveNewMarkerTrash() {
             } else {
                 showNoti('Add Trash Success');
                 markerArray.push({'marker':t_marker, 'name':_name, 'ip':_ip, status:0});
-                t_marker.unbindPopup();
-                t_marker.bindPopup(infowindow);
-                if (_name) {
-                    let ct= `<span style="color:crimson; font-size:15px;">${_name}</span>`
-                    t_marker.bindTooltip(ct, {permanent:true,direction:"top",offset:[1, -65],opacity:0.95}).openTooltip();
-                } else {
-                    t_marker.unbindTooltip();
-                }
-                setEventMarker(t_marker);
-                updateTrashStatus(markerArray);
+                getStateTrashFromIP(_ip); // Get first state trash
             }
             t_marker=null;
             if (routing) {
@@ -635,15 +625,16 @@ function saveNewMarkerTrash() {
                 cancelMarkerTrash();
             } else {
                 showNoti('Edit Trash Success');
-                markerArray[indexOld] = {'marker':t_marker, 'name':_name, 'ip':_ip, status:markerArray[indexOld].status};
-                t_marker.bindPopup(infowindow);
-                if (_name) {
-                    let ct= `<span style="color:crimson; font-size:15px;">${_name}</span>`
-                    t_marker.bindTooltip(ct, {permanent:true,direction:"top",offset:[1, -65],opacity:0.95}).openTooltip();
-                } else {
-                    t_marker.unbindTooltip();
+                let __status = markerArray[indexOld].status;
+                if (markerOld.ip != _ip) {
+                    __status = 0;
+                    let _icon = t_marker.getIcon();
+                    _icon.options.iconUrl = "/image/trash_undefine.png";
+                    t_marker.setIcon(_icon);
                 }
-                setEventMarker(t_marker);
+                markerArray[indexOld] = {'marker':t_marker, 'name':_name, 'ip':_ip, status:__status};
+                t_marker.bindPopup(infowindow);
+                getStateTrashFromIP(_ip); // Get first state trash
                 markerOld=null;
                 if (routing) {
                     isChange = true;
@@ -858,10 +849,49 @@ function btn_start_end() {
     $('#icon-btn2').css("background-image", "url('/image/cancel.png')");
     $('#txt-btn2').text('Remove');
 }
-function getStateTrashFromIP(trash) {
-    
+async function getStateTrashFromIP(ip) {
+    let find = markerArray.findIndex(_el => (_el.ip == ip));
+    if (find==-1) {
+        console.log("Error when get state trash from ip");
+        return;
+    }
+    let trash = markerArray[find];
+    trash.marker.unbindPopup();
+    trash.marker.bindPopup(infowindow);
+    trash.marker.off('click')
+    let ct = `<span style="color:blue; font-size:15px;">Getting state...</span>`;
+    trash.marker.bindTooltip(ct, {permanent:true,direction:"top",offset:[1, -65],opacity:0.95}).openTooltip();
+    const response = await fetch(`${g_url_server}getstatefromip?ip=${ip}`);
+    const data= await response.json();
+    setEventMarker(trash.marker);
+    if (response.status==200) {
+        if(data) {
+            console.log("STATE TRASH", data);
+            let _path_trash;
+            if (data.state === "FULL") {
+                trash.status = 1;
+                _path_trash = "/image/trash_full.png";
+            } else {
+                _path_trash = "/image/trash_empty.png";
+                trash.status = 2;
+            }
+            let _icon = trash.marker.getIcon();
+            _icon.options.iconUrl = _path_trash;
+            trash.marker.setIcon(_icon);
+            if (trash.name) {
+                let ct = `<span style="color:crimson; font-size:15px;">${trash.name}</span>`
+                trash.marker.bindTooltip(ct, {permanent:true,direction:"top",offset:[1, -65],opacity:0.95}).openTooltip();
+            } else {
+                trash.marker.unbindTooltip();
+            }
+            return;
+        }
+    }
+    ct = `<span style="color:blue; font-size:15px;">Get state FAIL</span>`
+    trash.marker.bindTooltip(ct, {permanent:true,direction:"top",offset:[1, -65],opacity:0.95}).openTooltip();
 }
 $(document).ready(function() {
+    // console.log = function() {};
     g_url_server = window.location.href;
     InitWeb();
     SwitchTab(1);

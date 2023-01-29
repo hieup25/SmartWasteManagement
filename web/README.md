@@ -60,5 +60,5 @@ localhost:9000/notify_trash?ip=1.1.1.1&status=FULL
 - [d] Thông báo thùng rác nào đầy
 - [d] Xử lý update api placeconfig
 - [d] Xử lý cấu hình api placeconfig với webui
-- [p] Sau khi thêm thùng rác mới thì cần request đến địa chỉ này để lấy trạng thái thùng rác (sẽ request đến server 9000 và để server này request đến thùng rác rồi response về webui => webui sẽ dựa vào response để điều chỉnh icon và trạng thái)
-- [p] Sau khi edit nếu thay đổi địa chỉ ip thì cập nhật lại icon là undefine và request lại đến địa chỉ client đó để lấy trạng thái
+- [d] Sau khi thêm thùng rác mới hoặc khi mới vào webui get status trash thì cần request đến địa chỉ này để lấy trạng thái thùng rác (sẽ request đến server 9000 và để server này request đến thùng rác rồi response về webui => webui sẽ dựa vào response để điều chỉnh icon và trạng thái)
+- [d] Sau khi edit nếu thay đổi địa chỉ ip thì cập nhật lại icon là undefine và request lại đến địa chỉ client đó để lấy trạng thái
