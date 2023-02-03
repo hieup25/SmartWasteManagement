@@ -24,8 +24,8 @@ String GetURL(const String& request) {
   int second_space = request.indexOf(' ', request.indexOf(' ') + 1);
   return (second_space != -1) ? request.substring(0, second_space) : UNKNOWN_URL;
 }
-String GetQuery() {
-  return "";
+void GetQuery(const String& url, char query[][50]) {
+  int start_query = url.indexOf('?');
 }
 void SendResponse(WiFiClient& client, int status, String msg, String response = "") {
   client.println("HTTP/1.1 " + String(status) + " " + msg);

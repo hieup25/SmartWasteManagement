@@ -1,4 +1,6 @@
-#define LIMIT_FULL 10 //cm
+#define LIMIT_FULL 20 //cm
+#define D5 14 // trig
+#define D6 12 // echo
 
 class HCSR04 {
   private:
@@ -6,22 +8,20 @@ class HCSR04 {
   int echo;
   String StateCurrent = "UNDEFINE";
   int getDistance() {
-    unsigned long duration; // biến đo thời gian
-    int distance;           // biến lưu khoảng cách
-    
-    /* Phát xung từ chân trig */
-    digitalWrite(trig,0);   // tắt chân trig
-    delayMicroseconds(2);
-    digitalWrite(trig,1);   // phát xung từ chân trig
-    delayMicroseconds(5);   // xung có độ dài 5 microSeconds
-    digitalWrite(trig,0);   // tắt chân trig
-    
-    /* Tính toán thời gian */
-    // Đo độ rộng xung HIGH ở chân echo. 
-    duration = pulseIn(echo,HIGH);  
-    // Tính khoảng cách đến vật.
-    distance = int(duration/2/29.412);
-    return distance;
+     long duration;  
+     int distance;
+     // Clears the trigPin
+     digitalWrite(trig, LOW);  
+     delayMicroseconds(2);  
+     // Sets the trigPin on HIGH state for 10 micro seconds  
+     digitalWrite(trig, HIGH);  
+     delayMicroseconds(10);  
+     digitalWrite(trig, LOW);  
+     // Reads the echoPin, returns the sound wave travel time in microseconds  
+     duration = pulseIn(echo, HIGH);
+     // Calculating the distance  
+     distance = duration*0.034/2;
+     return distance;
   }
   public:
   HCSR04(int trig, int echo) {
@@ -29,6 +29,7 @@ class HCSR04 {
     this->echo = echo;
     pinMode(trig, OUTPUT);   // chân trig sẽ phát tín hiệu
     pinMode(echo, INPUT);    // chân echo sẽ nhận tín hiệu
+    checkState();
   }
   String getState() {
     return StateCurrent;
@@ -39,6 +40,6 @@ class HCSR04 {
     } else {
       this->StateCurrent = "EMPTY";
     }
-    delay(100);
+    delay(50);
   }
 };

@@ -2,8 +2,8 @@
 
 #define BAUDRATE_TRACE 115200
 #define SERVER_PORT 80
-#define TRIG  7
-#define ECHO  8
+#define TRIG  D5
+#define ECHO  D6
 #define TRACE(...) Serial.printf(__VA_ARGS__);
 
 /* Set your Static IP address */
@@ -57,17 +57,17 @@ void setup() {
 void loop() {
   // Check if a client has request
   WiFiClient client = server.available();
-  if (!client) {
-    delay(200);
-    return;
-  }
   String currentLine = "";                // make a String to hold incoming data from the client
   currentTime = millis();
   previousTime = currentTime;
-  if (currentTime - previousTimeCheckTrash <= intervalCheckTrash) {
+  if (currentTime - previousTimeCheckTrash >= intervalCheckTrash) {
       previousTimeCheckTrash = currentTime;
       hcsr.checkState();
-      TRACE("CHECK STATE");
+      delay(50);
+  }
+  if (!client) {
+    delay(200);
+    return;
   }
   while (client.connected() && currentTime - previousTime <= timeoutTime) { // loop while the client's connected
     currentTime = millis();         

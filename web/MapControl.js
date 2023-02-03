@@ -867,13 +867,17 @@ async function getStateTrashFromIP(ip) {
     if (response.status==200) {
         if(data) {
             console.log("STATE TRASH", data);
-            let _path_trash;
+            let _path_trash, rt = true;
             if (data.state === "FULL") {
                 trash.status = 1;
                 _path_trash = "/image/trash_full.png";
-            } else {
+            } else if (data.state === "EMPTY") {
                 _path_trash = "/image/trash_empty.png";
                 trash.status = 2;
+            } else {
+                _path_trash = "/image/trash_undefine.png";
+                trash.status = 0;
+                rt = false;
             }
             let _icon = trash.marker.getIcon();
             _icon.options.iconUrl = _path_trash;
@@ -884,7 +888,8 @@ async function getStateTrashFromIP(ip) {
             } else {
                 trash.marker.unbindTooltip();
             }
-            return;
+            if (rt)
+                return;
         }
     }
     ct = `<span style="color:blue; font-size:15px;">Get state FAIL</span>`
