@@ -6,7 +6,9 @@ class HCSR04 {
   private:
   int trig;
   int echo;
+  String ip;
   String StateCurrent = "UNDEFINE";
+  void (*TriggerState)(String);
   int getDistance() {
      long duration;  
      int distance;
@@ -24,21 +26,31 @@ class HCSR04 {
      return distance;
   }
   public:
-  HCSR04(int trig, int echo) {
+  HCSR04(int trig, int echo, String ip) {
     this->trig = trig;
     this->echo = echo;
+    this->ip = ip;
     pinMode(trig, OUTPUT);   // chân trig sẽ phát tín hiệu
     pinMode(echo, INPUT);    // chân echo sẽ nhận tín hiệu
     checkState();
+  }
+  void setFunctionTrigger(void (*fun)(String)) {
+    TriggerState = fun;
   }
   String getState() {
     return StateCurrent;
   }
   void checkState() {
     if (getDistance() <= LIMIT_FULL) {
-      this->StateCurrent = "FULL";
+      if (this->StateCurrent != "FULL") {
+        TriggerState("?status=FULL&ip=" + ip);
+        this->StateCurrent = "FULL";
+      }
     } else {
-      this->StateCurrent = "EMPTY";
+      if (this->StateCurrent != "EMPTY") {
+        TriggerState("?status=EMPTY&ip=" + ip);
+        this->StateCurrent = "EMPTY"; 
+      }
     }
     delay(50);
   }

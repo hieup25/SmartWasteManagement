@@ -40,7 +40,7 @@ app.get('/get_marker_from_database', (req, res)=>{
       res.status(status).json(result);
    });
 });
-// status => FULL or EMPTY
+// status => FULL or EMPTY from Trash request
 app.get('/notify_trash', (req, res)=> {
    let ip = req.query.ip;
    let status = req.query.status;
@@ -108,9 +108,10 @@ app.put('/place_config', (req, res)=> {
 
 app.get('/getstatefromip', (req, res)=> {
    let ip = req.query.ip;
+   let server = req.query.server;
    const options = {
       hostname: ip,
-      path: '/get-state',
+      path: `/get-state?urlserver=${server}`,
       method: 'GET'
    };
    const _req = http.request(options, (_res) => {

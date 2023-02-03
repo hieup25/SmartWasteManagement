@@ -861,7 +861,7 @@ async function getStateTrashFromIP(ip) {
     trash.marker.off('click')
     let ct = `<span style="color:blue; font-size:15px;">Getting state...</span>`;
     trash.marker.bindTooltip(ct, {permanent:true,direction:"top",offset:[1, -65],opacity:0.95}).openTooltip();
-    const response = await fetch(`${g_url_server}getstatefromip?ip=${ip}`);
+    const response = await fetch(`${g_url_server}getstatefromip?ip=${ip}&server=${g_url_server}`);
     const data= await response.json();
     setEventMarker(trash.marker);
     if (response.status==200) {

@@ -8,6 +8,7 @@
 
 /* Set your Static IP address */
 IPAddress local_IP(192, 168, 1, 111);
+String local_IP_string = "192.168.1.111";
 // Set your Gateway IP address
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 0, 0);
@@ -28,7 +29,7 @@ const long timeoutTime = 2000;
 const long intervalCheckTrash = 5000;
 unsigned long previousTimeCheckTrash = 0;
 WiFiServer server(SERVER_PORT);
-HCSR04 hcsr(TRIG, ECHO);
+HCSR04 hcsr(TRIG, ECHO, local_IP_string);
 
 void setup() {
   Serial.begin(BAUDRATE_TRACE);
@@ -51,6 +52,7 @@ void setup() {
   TRACE("Server listening at http://");
   Serial.print(WiFi.localIP());
   TRACE(":%d\n", SERVER_PORT);
+  hcsr.setFunctionTrigger(GETRequest);
   ModuleData.hcsr = &hcsr;
 }
 
