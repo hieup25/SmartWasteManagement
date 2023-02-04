@@ -26,7 +26,7 @@ unsigned long currentTime = millis();
 unsigned long previousTime = 0; 
 // Define timeout time in milliseconds (example: 2000ms = 2s)
 const long timeoutTime = 2000;
-const long intervalCheckTrash = 5000;
+const long intervalCheckTrash = 1000;
 unsigned long previousTimeCheckTrash = 0;
 WiFiServer server(SERVER_PORT);
 HCSR04 hcsr(TRIG, ECHO, local_IP_string);

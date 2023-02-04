@@ -9,6 +9,7 @@
 #define URL_SERVER_QUERY "urlserver"
 
 const String GET_STATE_TRASH = "GET /get-state";
+const String GET_DELETE_SERVER = "GET /delete-server";
 
 // Array of servers registered to receive notifications
 
@@ -36,6 +37,7 @@ bool AddServer(const String& server, String& msg_error) {
         return true;
       }
     }
+    Serial.println("Add server " + server + " success");
     g_arrayServer[g_count_server] = server;
     g_count_server++;
     return true;
@@ -43,6 +45,28 @@ bool AddServer(const String& server, String& msg_error) {
     msg_error = "Max Count Server";
   }
   return false;
+}
+bool DelServer(const String& server) {
+  String temp[MAX_COUNT_SERVER];
+  int count = 0;
+  for (int i = 0; i < MAX_COUNT_SERVER; i++) {
+    if (g_arrayServer[i].equals(server)) {
+      g_arrayServer[i] = "";
+      Serial.println("Delete server" + server + "config success");
+    }
+    if (g_arrayServer[i].length() != 0) {
+      temp[count] = g_arrayServer[i];
+      count++;
+    }
+  }
+  g_count_server = 0;
+  for (int i = 0; i < MAX_COUNT_SERVER; i++) {
+    if (temp[i].length() != 0) {
+      g_arrayServer[i] = temp[i];
+      g_count_server++;
+    }
+  }
+  return true;
 }
 bool GetQuery(const String& url, String& val, const String query) {
   int _find_start = url.indexOf('?');
@@ -63,6 +87,7 @@ bool GetQuery(const String& url, String& val, const String query) {
   return false;
 }
 void SendResponse(WiFiClient& client, int status, String msg, String response = "") {
+  Serial.println(msg);
   client.println("HTTP/1.1 " + String(status) + " " + msg);
   client.println("Content-type:application/json");
   client.println("Connection: close");
@@ -73,13 +98,16 @@ void SendResponse(WiFiClient& client, int status, String msg, String response = 
   }
 }
 void GETRequest(String data) {
-  Serial.println(data);
   // Notification
   for (int i = 0; i < g_count_server; i++) {
-    WiFiClient client;
+    if (g_arrayServer[i].length() == 0) {
+      return;
+    }
+    WiFiClient _client;
     HTTPClient http;
     String serverPath = g_arrayServer[i] + data;
-    http.begin(client, serverPath.c_str());
+    Serial.println(serverPath);
+    http.begin(_client, serverPath.c_str());
     // Send HTTP GET request
     int httpResponseCode = http.GET();
     if (httpResponseCode > 0) {
@@ -91,6 +119,7 @@ void GETRequest(String data) {
     else {
       Serial.print("Error code: ");
       Serial.println(httpResponseCode);
+      Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpResponseCode).c_str());
     }
     http.end();
   }
@@ -108,6 +137,18 @@ void HandleRequest(HttpSession& http) {
         return;
       }
       SendResponse(http.client, 200, "OK", "{\"state\":\"" + ModuleData.hcsr->getState() + "\"}");
+    } else {
+      SendResponse(http.client, 400, "Not Found Query Server");
+    }
+  } else if (_url.indexOf(GET_DELETE_SERVER) != -1) {
+    String get_server;
+    if (GetQuery(_url, get_server, URL_SERVER_QUERY)) {
+      String msg_error;
+      if (!DelServer(get_server)) {
+        SendResponse(http.client, 400, "Error when Del server");
+        return;
+      }
+      SendResponse(http.client, 200, "OK");
     } else {
       SendResponse(http.client, 400, "Not Found Query Server");
     }

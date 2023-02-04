@@ -42,6 +42,7 @@ app.get('/get_marker_from_database', (req, res)=>{
 });
 // status => FULL or EMPTY from Trash request
 app.get('/notify_trash', (req, res)=> {
+   console.log("Notify trash", req.query);
    let ip = req.query.ip;
    let status = req.query.status;
    if (status !== 'FULL' && status !== 'EMPTY') {
@@ -84,10 +85,32 @@ app.put('/edit_marker_from_database', (req, res) => {
 });
 app.delete('/delete_marker_to_database', (req, res)=>{
    let ip = req.query.ip;
+   let server = req.query.server;
    if (ip) {
       console.log(ip);
       database.DeleteMarker(ip, function(status, result) {
          res.status(status).json(result);
+         const options = {
+            hostname: ip,
+            path: `/delete-server?urlserver=${server}notify_trash`,
+            method: 'GET'
+         };
+         const _req = http.request(options, (_res) => {
+            let data = ''
+            if (_res.statusCode == 200) {
+               _res.on('data', (chunk) => {
+                   data += chunk;
+               });
+               // Ending the response 
+               _res.on('end', () => {
+                  //console.log(JSON.parse(data));
+               });
+            } else {
+               console.log("error");
+            }
+         }).on("error", (err) => {
+               console.log("error");
+         }).end();
       });
    } else {
       res.status(406).json([]);
@@ -111,7 +134,7 @@ app.get('/getstatefromip', (req, res)=> {
    let server = req.query.server;
    const options = {
       hostname: ip,
-      path: `/get-state?urlserver=${server}`,
+      path: `/get-state?urlserver=${server}notify_trash`,
       method: 'GET'
    };
    const _req = http.request(options, (_res) => {

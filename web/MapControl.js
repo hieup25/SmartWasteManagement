@@ -301,6 +301,7 @@ async function getMakerData() {
                 markerArray.push({'marker':marker, 'name':val.NAME, 'ip':val.IP, 'status':0}); // Not asyn, cause init
             }
         });
+        updateTrashStatus(markerArray);
         markerArray.forEach(el => {
             getStateTrashFromIP(el.ip);
         });
@@ -337,12 +338,13 @@ function updateStatusTrash() {
                             showNoti(`Trash '${_trash.name}(${_trash.ip})' is full`);
                         }
                     }
+                    updateTrashStatus(markerArray);
                 });
             }
         } catch (e) {
             console.log("Error when GET update_status_trash", e);
         }
-    }, 3000);
+    }, 1000);
 }
 async function getPlaceConfig() {
     const response = await fetch(`${g_url_server}place_config`);
@@ -511,7 +513,7 @@ function MarkerRemove() {
         if (index_temp!=-1) {
             let _ip = markerArray[index_temp].ip;
             let _status = markerArray[index_temp].status;
-            fetch(`${g_url_server}delete_marker_to_database?ip=${_ip}`, {
+            fetch(`${g_url_server}delete_marker_to_database?ip=${_ip}&server=${g_url_server}`, {
                 method: 'DELETE'
             }).then(res => {
                 if (res.status!=200) {
@@ -528,6 +530,7 @@ function MarkerRemove() {
                     routing.remove();
                     t_on_off = 0;
                 }
+                updateTrashStatus(markerArray);
             });
         } else {
             showAlert('An error occurred');
@@ -633,6 +636,7 @@ function saveNewMarkerTrash() {
                     t_marker.setIcon(_icon);
                 }
                 markerArray[indexOld] = {'marker':t_marker, 'name':_name, 'ip':_ip, status:__status};
+                updateTrashStatus(markerArray);
                 t_marker.bindPopup(infowindow);
                 getStateTrashFromIP(_ip); // Get first state trash
                 markerOld=null;
@@ -888,10 +892,12 @@ async function getStateTrashFromIP(ip) {
             } else {
                 trash.marker.unbindTooltip();
             }
+            updateTrashStatus(markerArray);
             if (rt)
                 return;
         }
     }
+    updateTrashStatus(markerArray);
     ct = `<span style="color:blue; font-size:15px;">Get state FAIL</span>`
     trash.marker.bindTooltip(ct, {permanent:true,direction:"top",offset:[1, -65],opacity:0.95}).openTooltip();
 }

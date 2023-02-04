@@ -23,6 +23,7 @@ class HCSR04 {
      duration = pulseIn(echo, HIGH);
      // Calculating the distance  
      distance = duration*0.034/2;
+//     Serial.println("distance: "+ String(distance));
      return distance;
   }
   public:
@@ -32,10 +33,10 @@ class HCSR04 {
     this->ip = ip;
     pinMode(trig, OUTPUT);   // chân trig sẽ phát tín hiệu
     pinMode(echo, INPUT);    // chân echo sẽ nhận tín hiệu
-    checkState();
   }
   void setFunctionTrigger(void (*fun)(String)) {
-    TriggerState = fun;
+    this->TriggerState = fun;
+    checkState();
   }
   String getState() {
     return StateCurrent;
